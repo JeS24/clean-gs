@@ -1,0 +1,34 @@
+# Clean-GS Requirements
+# Minimal dependencies for the V11 pruning implementation
+
+# Core dependencies
+numpy>=1.23.0
+opencv-python>=4.7.0
+plyfile>=0.8.1
+
+# COLMAP conversion
+pycolmap>=3.13.0
+
+# Optional: For selecting distributed mask views
+scikit-learn>=1.2.0
+
+# ============================================
+# INSTALLATION:
+# ============================================
+#
+# 1. Create conda environment:
+#    conda create -n clean-gs python=3.10 -y
+#    conda activate clean-gs
+#
+# 2. Install requirements:
+#    pip install -r requirements.txt
+#
+# 3. Verify installation:
+#    python clean-gs.py --help
+#
+# ============================================
+# NOTES:
+# ============================================
+# - PyTorch NOT required for pruning (only for training 3DGS models)
+# - SAM2 and GroundingDINO NOT required (we use pre-made masks)
+# - COLMAP required only for converting camera data
