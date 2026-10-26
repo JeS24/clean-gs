@@ -226,3 +226,7 @@ CleanGS is released under the [MIT License](LICENSE). The COLMAP parser in
 [gsplat](https://github.com/nerfstudio-project/gsplat) and is under the
 Apache License 2.0 (see the `LICENSE` file in that directory). We thank the 
 authors of `gsplat` for making their code open-source.
+
+## Acknowledgements
+
+Computational resources for this work were partly funded by the Department of Atomic Energy, Government of India, under project code: RIN4001. The authors acknowledge the support of the National Institute of Science Education and Research (NISER), Bhubaneswar, and Homi Bhabha National Institute (HBNI), Mumbai.
