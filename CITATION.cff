@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below."
+title: "CleanGS: Pareto-Guided Post-Hoc Cleanup of 3D Gaussian Splatting Scenes"
+type: software
+version: 0.1.0
+license: MIT
+repository-code: "https://github.com/smlab-niser/clean-gs"
+authors: &authors
+  - family-names: Shivottam
+    given-names: Jyotirmaya
+    email: jyotirmaya.shivottam@niser.ac.in
+    orcid: "https://orcid.org/0000-0002-2688-9421"
+    affiliation: "National Institute of Science Education and Research, Bhubaneswar, Odisha, India; Homi Bhabha National Institute, Mumbai, India"
+  - family-names: Kumar
+    given-names: Om
+    email: om.mitmpl2023@learner.manipal.edu
+    orcid: "https://orcid.org/0009-0001-6754-995X"
+    affiliation: "Manipal Institute of Technology, Manipal, Karnataka, India"
+  - family-names: Mishra
+    given-names: Subhankar
+    email: smishra@niser.ac.in
+    orcid: "https://orcid.org/0000-0002-9910-7291"
+    affiliation: "National Institute of Science Education and Research, Bhubaneswar, Odisha, India; Homi Bhabha National Institute, Mumbai, India"
+keywords:
+  - 3D Gaussian Splatting
+  - scene cleanup
+  - view selection
+  - Pareto optimization
+preferred-citation:
+  type: conference-paper
+  title: "CleanGS: Pareto-Guided Post-Hoc Cleanup of 3D Gaussian Splatting Scenes"
+  authors: *authors
+  collection-title: "Proceedings of the Seventeenth Indian Conference on Computer Vision, Graphics and Image Processing (ICVGIP)"
+  publisher:
+    name: "ACM"
+  year: 2026
+  # TODO: add "doi:" once the proceedings are published.

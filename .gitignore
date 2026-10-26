@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+*.ply
+*.pt
+*.npz
+*.log
+out/
+outputs/
+runs/
+
+# Environments and builds
+.venv/
+dist/
+build/
+*.egg-info/
