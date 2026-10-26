@@ -1,183 +1,228 @@
-# Clean-GS: Semantic Floater Removal for 3D Gaussian Splatting
+# CleanGS: Pareto-Guided Post-Hoc Cleanup of 3D Gaussian Splatting Scenes
 
-Official implementation of **Clean-GS**, a method for removing background clutter and floaters from 3D Gaussian Splatting reconstructions using sparse semantic masks.
+Jyotirmaya Shivottam, Om Kumar, Subhankar Mishra
 
-## Overview
+ICVGIP 2026 · [Paper (arXiv)](https://arxiv.org/abs/2601.00913) · [Supplementary Material](docs/CleanGS_ICVGIP2026_supplementary.pdf)
 
-3D Gaussian Splatting produces high-quality scene reconstructions but generates hundreds of thousands of spurious Gaussians (floaters) scattered throughout the environment. Clean-GS addresses this by combining whitelist-based spatial filtering with color-guided validation and outlier removal to achieve 60-80% model compression while preserving object quality.
+<!-- TODO: add the proceedings DOI once published. -->
 
-## Features
+CleanGS removes clutter from a pretrained 3D Gaussian Splatting (3DGS) scene
+without retraining. It takes calibrated images and binary masks of the target,
+then selects three views by comparing four objectives on a Pareto front.
+A Gaussian is kept if it is visible and its projected center falls inside the
+target mask in at least two selected views. The retained Gaussians are exported
+with their geometry, opacity and appearance unchanged.
 
-- **Sparse Supervision**: Uses as few as 3 segmentation masks (1% of views)
-- **Three-Stage Pipeline**:
-  1. Whitelist filtering via projection to masked regions
-  2. Depth-buffered color validation
-  3. Neighbor-based outlier removal (k-NN)
-- **High Compression**: 60-80% reduction in Gaussians with maintained quality
-- **Monument Isolation**: Extract clean objects from complex outdoor scenes
-
-## Installation
-
-```bash
-# Clone the repository
-git clone https://github.com/YOUR_USERNAME/clean-gs.git
-cd clean-gs
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-## Requirements
-
-- Python 3.8+
-- PyTorch
-- Open3D
-- NumPy
-- SciPy
-- PIL
-
-See [requirements.txt](requirements.txt) for complete dependencies.
-
-## Data Structure
-
-Your data should be organized as follows:
-
-```
-data/
-├── datasets/
-│   └── temple/                    # Scene name
-│       ├── images/                # Input images
-│       ├── sparse/0/              # COLMAP sparse reconstruction
-│       │   ├── cameras.bin
-│       │   ├── images.bin
-│       │   └── points3D.bin
-│       ├── cameras.json           # Camera parameters (generated)
-│       └── masks/                 # Semantic segmentation masks (PNG)
-│           ├── 000000.png
-│           ├── 000001.png
-│           └── ...
-└── models/
-    └── temple/                    # Trained 3DGS model
-        └── point_cloud/
-            └── iteration_30000/
-                └── point_cloud.ply
-```
-
-### Creating Masks
-
-Use [Segment Anything (SAM)](https://github.com/facebookresearch/segment-anything) to create semantic masks for your objects of interest. You only need 3-5 masks for effective floater removal.
-
-## Usage
-
-### Basic Usage
-
-```bash
-python clean-gs.py \
-    --scene temple \
-    --masks_dir data/datasets/temple/masks \
-    --input_ply data/models/temple/point_cloud/iteration_30000/point_cloud.ply \
-    --output_ply data/models/temple/point_cloud/iteration_30000/clean.ply
-```
-
-### With Custom Parameters
-
-```bash
-python clean-gs.py \
-    --scene temple \
-    --masks_dir data/datasets/temple/masks \
-    --input_ply data/models/temple/point_cloud/iteration_30000/point_cloud.ply \
-    --output_ply clean_output.ply \
-    --color_threshold 0.3 \
-    --k_neighbors 5 \
-    --neighbor_threshold 0.7
-```
-
-### Parameters
-
-- `--scene`: Scene name (must match directory in data/datasets/)
-- `--masks_dir`: Directory containing semantic masks
-- `--input_ply`: Input 3DGS point cloud file
-- `--output_ply`: Output cleaned point cloud file
-- `--color_threshold`: Color validation threshold (default: 0.3)
-- `--k_neighbors`: Number of neighbors for outlier detection (default: 5)
-- `--neighbor_threshold`: Outlier removal threshold (default: 0.7)
-
-## Results
-
-### Temple (Tanks and Temples)
-
-- **Original**: 526K Gaussians, 125 MB
-- **Clean-GS**: 198K Gaussians, 47 MB (62% reduction)
-- **Quality**: Maintained rendering quality with PSNR preserved
-
-### Isha Statue
-
-- **Original**: 1,112K Gaussians, 263.6 MB
-- **Clean-GS**: 223K Gaussians, 52.8 MB (80% reduction)
-
-## Pipeline Stages
-
-| Stage | Removed | Remaining | Compression |
-|-------|---------|-----------|-------------|
-| Original | - | 526K | 0% |
-| + Whitelist | 163K | 363K | 31% |
-| + Color Validation | 155K | 208K | 60% |
-| + Neighbor Removal | 10K | 198K | 62% |
-
-## Quick Start
-
-### 1. Prepare Data
-
-See [data/README.md](data/README.md) for detailed data preparation instructions. Quick summary:
-
-1. **Capture or download multi-view images** (100-300 views)
-2. **Run COLMAP** to get sparse reconstruction
-   ```bash
-   bash scripts/run_colmap_temple.sh
-   ```
-3. **Train 3D Gaussian Splatting** model
-   ```bash
-   python train.py -s data/datasets/YOUR_SCENE -m data/models/YOUR_SCENE
-   ```
-4. **Generate 3-5 semantic masks** using [SAM](https://github.com/facebookresearch/segment-anything)
-5. **Convert camera parameters**
-   ```bash
-   python scripts/colmap_to_json.py --colmap_path data/datasets/YOUR_SCENE/sparse/0 --output_json data/datasets/YOUR_SCENE/cameras.json
-   ```
-
-### 2. Run Clean-GS
-
-```bash
-python clean-gs.py \
-    --scene YOUR_SCENE \
-    --masks_dir data/datasets/YOUR_SCENE/masks \
-    --input_ply data/models/YOUR_SCENE/point_cloud/iteration_30000/point_cloud.ply \
-    --output_ply clean_output.ply
-```
 
 ## Citation
 
-If you use Clean-GS in your research, please cite:
+If you use CleanGS, please cite our paper:
 
 ```bibtex
-@article{cleangs2026,
-  title={Clean-GS: Semantic Floater Removal for 3D Gaussian Splatting},
-  author={Subhankar Mishra},
-  journal={arXiv preprint},
-  year={2026}
+@inproceedings{shivottam2026cleangs,
+  title     = {{CleanGS}: Pareto-Guided Post-Hoc Cleanup of {3D} {Gaussian} Splatting Scenes},
+  author    = {Shivottam, Jyotirmaya and Kumar, Om and Mishra, Subhankar},
+  booktitle = {Proceedings of the Seventeenth Indian Conference on Computer Vision, Graphics and Image Processing (ICVGIP)},
+  year      = {2026},
+  publisher = {ACM}
 }
 ```
 
+---
+
+## Contents
+
+```text
+.
+├── pyproject.toml
+├── uv.lock
+├── src/cleangs/
+│   ├── select_views.py         stage 1: Pareto-guided view selection    (cleangs-select)
+│   ├── multiview_filter.py     stage 2: multiview filtering and export  (cleangs-filter)
+│   ├── evaluate.py             stage 3: exported asset evaluation      (cleangs-evaluate)
+│   ├── camera_utils.py         COLMAP camera loading and projection
+│   ├── gaussians.py            gsplat checkpoint and PLY loading
+│   └── _vendor/gsplat_colmap/  COLMAP parser from the gsplat examples (Apache-2.0)
+├── CITATION.cff
+└── LICENSE
+```
+
+## Setup
+
+CleanGS requires Linux and an NVIDIA GPU with a driver that supports CUDA 12.8.
+`gsplat` compiles its CUDA kernels on first use. So, the CUDA compiler (`nvcc`)
+must be on `PATH` the first time you run stage 2 or 3.
+
+With [uv](https://docs.astral.sh/uv/):
+
+```bash
+git clone https://github.com/smlab-niser/clean-gs.git
+cd clean-gs
+uv sync
+source .venv/bin/activate
+```
+
+`uv sync` installs the dependency versions used for the paper, including
+PyTorch 2.8.0 built for CUDA 12.8. You can also run the commands below with
+`uv run` instead of activating the environment.
+
+With pip, install PyTorch first and then the package:
+
+```bash
+pip install torch==2.8.0 torchvision==0.23.0 --index-url https://download.pytorch.org/whl/cu128
+pip install -e .
+```
+
+Check the installation:
+
+```bash
+python -c "import torch, gsplat; print(torch.cuda.is_available(), gsplat.__version__)"
+cleangs-select --help
+```
+
+## Inputs
+
+Each scene is a COLMAP-style directory:
+
+```text
+<scene>/
+├── images/                 capture images
+├── sparse/0/               COLMAP model (cameras.bin, images.bin, points3D.bin)
+├── masks_train_no_val/     target masks for training views (selection candidates)
+└── masks_latest/           target masks for all views (evaluation only)
+```
+
+You also need a pretrained Gaussian scene: a `gsplat` checkpoint
+(for example `ckpt_29999_rank0.pt`) or a `.ply` file.
+
+Masks are binary PNGs with the target in white and the same filename stem as
+the corresponding image. The commands below use `masks_train_no_val/` for view
+selection and filtering, and `masks_latest/` to evaluate the exported asset.
+With the default `--test_every 8`, every eighth view in filename order is held
+out for evaluation, starting with the first.
+
+## Running CleanGS
+
+The commands below reproduce the configuration reported in the paper. Set
+`SCENE` to the scene directory, `CKPT` to the pretrained checkpoint, and `OUT`
+to an output directory.
+
+```bash
+SCENE=/path/to/scene
+NAME=$(basename $SCENE)
+CKPT=/path/to/ckpt_29999_rank0.pt
+OUT=./out/$NAME
+```
+
+### 1. View selection
+
+```bash
+cleangs-select \
+  --dataset $SCENE --masks_dir $SCENE/masks_train_no_val \
+  --k 3 --candidate_pool 0 \
+  --coverage_aggregation min \
+  --w_coverage 0.45 --w_baseline 0.30 --w_overlap 0.15 --w_angle 0.10 \
+  --min_coverage 0.02 --max_coverage 0.60 \
+  --target_coverage 0.30 --coverage_sigma 0.15 \
+  --max_border_touch_sides 1 --min_bbox_margin 0.03 --max_bbox_frac 0.90 \
+  --output_masks_dir masks_pareto_k3
+```
+
+The selector scores each mask and filters candidates by mask coverage and
+containment. It also removes dominated candidates when at least three would
+remain. It then scores every three-view subset on mask reliability `A(S)`,
+camera baseline `B(S)`, dissimilarity of SfM points inside the masks `O(S)` and
+diversity of viewing directions `T(S)`. From the resulting Pareto front, it picks
+the subset with the smallest weighted Chebyshev distance to the ideal point.
+View selection runs on the CPU.
+
+**If too few views pass.** If the log reports fewer than three eligible views,
+the selector stops without creating `$SCENE/masks_pareto_k3/`. Run it again with
+the containment tests disabled and the candidate pool capped at 60 views:
+
+```bash
+cleangs-select \
+  --dataset $SCENE --masks_dir $SCENE/masks_train_no_val \
+  --k 3 --candidate_pool 60 --disable_heuristics \
+  --coverage_aggregation min \
+  --w_coverage 0.45 --w_baseline 0.30 --w_overlap 0.15 --w_angle 0.10 \
+  --min_coverage 0.02 --max_coverage 0.60 \
+  --target_coverage 0.30 --coverage_sigma 0.15 \
+  --output_masks_dir masks_pareto_k3
+```
+
+Outputs, written into the scene directory:
+
+```text
+<scene>/
+├── masks_pareto_k3/             the three selected masks (used by stage 2)
+├── selected_views.txt           the selected three-view subset
+├── selected_views_pareto.txt    all non-dominated subsets, with the selection marked
+├── pareto_front.json            objective values of the front
+└── pareto_view_selection.log    per-view and per-subset details
+```
+
+### 2. Multiview filtering and export
+
+```bash
+cleangs-filter \
+  --ply $CKPT --data_dir $SCENE \
+  --masked_images $SCENE/masks_pareto_k3 \
+  --output_dir $OUT --scene_name $NAME \
+  --steps 1 --step1_mode multiview --min_views 2 \
+  --no_metrics
+```
+
+The filter renders the scene from each selected camera. A view supports a
+Gaussian when the renderer marks it visible and its projected center lies
+inside that view's mask. With `--min_views 2`, the filter keeps Gaussians supported
+by at least two of the three views.
+
+Output: `$OUT/1_<NAME>_cgspp.ply`, containing the retained Gaussians.
+`step1_<NAME>_cgspp.ply` contains the same asset.
+
+`--min_views 1` or `3` changes the vote threshold.
+
+> [!NOTE]
+> The released code skips an unused colour-conversion loop included in the paper's timings, so filtering is faster and the reported runtimes in the paper are conservative -- CleanGS is faster than reported : )
+
+### 3. Evaluation
+
+```bash
+cleangs-evaluate \
+  --ply $OUT/1_${NAME}_cgspp.ply \
+  --data_dir $SCENE --masks $SCENE/masks_latest \
+  --output_dir $OUT/eval \
+  --zoom_factor 6.0 --zoom_mode faceon --test_every 8
+```
+
+The evaluator renders the exported asset at the original framing and with a
+wider field of view at the same camera pose. In `faceon` mode, it divides the
+focal length by `--zoom_factor`. It reports masked PSNR, SSIM, LPIPS and
+silhouette leakage at both framings.
+
+Output: `$OUT/eval/<NAME>_metrics_more.json`. Its `averages` field contains the
+mean scores across evaluated views:
+
+* `standard` and `zoomed`: PSNR, SSIM and LPIPS at the two framings;
+* `leakage.l_leak` and `zoomed.l_leak_z`: mean rendered opacity outside the
+  target at the two framings, as reported in the paper. `l_leak_tau` measures
+  the fraction of pixels outside the target whose opacity exceeds the threshold.
+
+Rendered views go to `$OUT/eval/renders/`; pass `--no_save_renders` to skip them.
+
+**Other asset formats.** CleanGS exports assets in gsplat format, which need no
+extra flags. For assets in the original 3DGS (INRIA) format, including the
+FlashSplat and GaussianCut exports used in the paper and raw `point_cloud.ply`
+files, add `--no_normalize_cameras --sh_layout 3dgs`.
+
+Each stage can also be run as a module, for example
+`python -m cleangs.select_views --help`.
+
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments
-
-- [3D Gaussian Splatting](https://github.com/graphdeco-inria/gaussian-splatting) for the base representation
-- [Segment Anything](https://github.com/facebookresearch/segment-anything) for mask generation
-- [Tanks and Temples](https://www.tanksandtemples.org/) for benchmark datasets
-
-## Contact
-
-For questions or issues, please open an issue on GitHub.
+CleanGS is released under the [MIT License](LICENSE). The COLMAP parser in
+`src/cleangs/_vendor/gsplat_colmap/` is copied from
+[gsplat](https://github.com/nerfstudio-project/gsplat) and is under the
+Apache License 2.0 (see the `LICENSE` file in that directory). We thank the 
+authors of `gsplat` for making their code open-source.
